@@ -46,8 +46,10 @@ dev_dependencies:
   flutter_lints: ^4.0.0
   bloc_test: ^9.1.7
   mocktail: ^1.0.4
-  hive_generator: ^2.0.1
-  build_runner: ^2.4.11
+  # NOTE: Hive TypeAdapter codegen (hive_generator/build_runner) is intentionally
+  # omitted for now — hive_generator caps `analyzer <7.0.0`, which conflicts with
+  # bloc_test. Add the maintained `hive_ce`/`hive_ce_generator` fork when
+  # generated adapters are first needed (later phases).
 
 flutter:
   uses-material-design: true
