@@ -1,0 +1,63 @@
+name: Build GazaLook
+
+# Build the Flutter app on every push / PR to the working branches and on
+# manual dispatch. Produces a debug APK artifact so the app can be installed
+# and smoke-tested from CI.
+on:
+  push:
+    branches:
+      - main
+      - "claude/**"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    name: Analyze & build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java (required by the Android toolchain)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Show Flutter version
+        run: flutter --version
+
+      # The repo holds only lib/ + pubspec (Clean Architecture source). Generate
+      # the missing native platform folders without touching lib/ or pubspec.
+      - name: Generate platform scaffolding (android)
+        run: flutter create --platforms=android --project-name gazalook .
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze (non-blocking — surfaces lint issues)
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        continue-on-error: true
+
+      - name: Run tests (if any)
+        run: flutter test
+        continue-on-error: true
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gazalook-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
