@@ -1,56 +1,87 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/otp_page.dart';
+import '../../features/home/presentation/pages/home_placeholder_page.dart';
 import '../widgets/placeholder_screen.dart';
 import 'app_routes.dart';
+import 'go_router_refresh_stream.dart';
 
-/// Application router built on `go_router`.
+/// Builds the app router and guards routes against the current [AuthState].
 ///
-/// Phase 1 wires the shell and route table with placeholder destinations so
-/// navigation is exercised end-to-end. Each subsequent phase swaps its
-/// placeholder for the real screen (auth → home → PDP → cart/checkout).
+/// Redirect rules:
+///   * unauthenticated  → `/login`
+///   * OTP sent         → `/otp`
+///   * authenticated    → the requested in-app route (default `/`)
 abstract final class AppRouter {
   const AppRouter._();
 
-  static final GoRouter router = GoRouter(
-    initialLocation: AppRoutes.home,
-    debugLogDiagnostics: true,
-    routes: <RouteBase>[
-      GoRoute(
-        path: AppRoutes.home,
-        name: 'home',
-        builder: (context, state) =>
-            const PlaceholderScreen(title: 'الرئيسية', icon: Icons.home_outlined),
-      ),
-      GoRoute(
-        path: AppRoutes.onboarding,
-        name: 'onboarding',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'أهلاً بك',
-          icon: Icons.waving_hand_outlined,
+  static GoRouter create(AuthBloc authBloc) {
+    return GoRouter(
+      initialLocation: AppRoutes.home,
+      debugLogDiagnostics: true,
+      refreshListenable: GoRouterRefreshStream(authBloc.stream),
+      redirect: (BuildContext context, GoRouterState state) {
+        final AuthStatus status = authBloc.state.status;
+        final String location = state.matchedLocation;
+
+        // Wait for the cached-session check to resolve before redirecting.
+        if (status == AuthStatus.unknown) return null;
+
+        final bool onLogin = location == AppRoutes.login;
+        final bool onOtp = location == AppRoutes.otp;
+
+        switch (status) {
+          case AuthStatus.unauthenticated:
+            return onLogin ? null : AppRoutes.login;
+          case AuthStatus.codeSent:
+            return onOtp ? null : AppRoutes.otp;
+          case AuthStatus.authenticated:
+            return (onLogin || onOtp) ? AppRoutes.home : null;
+          case AuthStatus.unknown:
+            return null;
+        }
+      },
+      routes: <RouteBase>[
+        GoRoute(
+          path: AppRoutes.home,
+          name: 'home',
+          builder: (context, state) => const HomePlaceholderPage(),
         ),
-      ),
-      GoRoute(
-        path: AppRoutes.cart,
-        name: 'cart',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'السلة',
-          icon: Icons.shopping_cart_outlined,
+        GoRoute(
+          path: AppRoutes.login,
+          name: 'login',
+          builder: (context, state) => const LoginPage(),
         ),
-      ),
-      GoRoute(
-        path: AppRoutes.profile,
-        name: 'profile',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'حسابي',
-          icon: Icons.person_outline,
+        GoRoute(
+          path: AppRoutes.otp,
+          name: 'otp',
+          builder: (context, state) => const OtpPage(),
         ),
+        GoRoute(
+          path: AppRoutes.cart,
+          name: 'cart',
+          builder: (context, state) => const PlaceholderScreen(
+            title: 'السلة',
+            icon: Icons.shopping_cart_outlined,
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.profile,
+          name: 'profile',
+          builder: (context, state) => const PlaceholderScreen(
+            title: 'حسابي',
+            icon: Icons.person_outline,
+          ),
+        ),
+      ],
+      errorBuilder: (context, state) => PlaceholderScreen(
+        title: 'الصفحة غير موجودة',
+        icon: Icons.error_outline,
+        message: state.error?.toString() ?? '404',
       ),
-    ],
-    errorBuilder: (context, state) => PlaceholderScreen(
-      title: 'الصفحة غير موجودة',
-      icon: Icons.error_outline,
-      message: state.error?.toString() ?? '404',
-    ),
-  );
+    );
+  }
 }
