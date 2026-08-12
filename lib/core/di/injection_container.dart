@@ -13,6 +13,7 @@ import '../../features/auth/domain/usecases/verify_otp.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/cart/data/datasources/cart_local_datasource.dart';
 import '../../features/cart/presentation/cubit/cart_cubit.dart';
+import '../../features/cart/presentation/cubit/checkout_cubit.dart';
 import '../../features/home/data/datasources/home_remote_datasource.dart';
 import '../../features/home/data/repositories/home_repository_impl.dart';
 import '../../features/home/domain/repositories/home_repository.dart';
@@ -27,6 +28,12 @@ import '../../features/products/domain/usecases/get_products.dart';
 import '../../features/products/presentation/bloc/products_bloc.dart';
 import '../../features/products/presentation/bloc/wishlist_cubit.dart';
 import '../../features/products/presentation/cubit/product_detail_cubit.dart';
+import '../../features/orders/data/datasources/order_local_datasource.dart';
+import '../../features/orders/data/repositories/order_repository_impl.dart';
+import '../../features/orders/domain/repositories/order_repository.dart';
+import '../../features/orders/domain/usecases/get_orders.dart';
+import '../../features/orders/domain/usecases/place_order.dart';
+import '../../features/orders/presentation/cubit/orders_cubit.dart';
 
 /// Global service locator.
 final GetIt sl = GetIt.instance;
@@ -42,6 +49,7 @@ Future<void> initDependencies() async {
   _initProducts();
   _initHome();
   _initCart();
+  _initOrders();
 }
 
 void _initAuth() {
@@ -110,7 +118,23 @@ void _initCart() {
       () => CartLocalDataSourceImpl(sl<SharedPreferences>()),
     )
     // Cart is app-wide (badge + PDP + cart screen share it), persisted.
-    ..registerLazySingleton(() => CartCubit(sl<CartLocalDataSource>()));
+    ..registerLazySingleton(() => CartCubit(sl<CartLocalDataSource>()))
+    // Checkout form/submission cubit (fresh per checkout visit).
+    ..registerFactory(() => CheckoutCubit(sl<PlaceOrder>()));
+}
+
+void _initOrders() {
+  sl
+    ..registerLazySingleton<OrderLocalDataSource>(
+      () => OrderLocalDataSourceImpl(sl<SharedPreferences>()),
+    )
+    ..registerLazySingleton<OrderRepository>(
+      () => OrderRepositoryImpl(local: sl<OrderLocalDataSource>()),
+    )
+    ..registerLazySingleton(() => PlaceOrder(sl<OrderRepository>()))
+    ..registerLazySingleton(() => GetOrders(sl<OrderRepository>()))
+    // Fresh per orders-screen visit; reads from the persisted store.
+    ..registerFactory(() => OrdersCubit(sl<GetOrders>()));
 }
 
 void _initHome() {

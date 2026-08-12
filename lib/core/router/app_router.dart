@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_page.dart';
+import '../../features/cart/presentation/pages/cart_page.dart';
+import '../../features/cart/presentation/pages/checkout_page.dart';
 import '../../features/home/presentation/pages/home_feed_page.dart';
+import '../../features/orders/presentation/pages/orders_page.dart';
 import '../../features/products/presentation/pages/product_detail_page.dart';
 import '../widgets/placeholder_screen.dart';
 import 'app_routes.dart';
@@ -87,18 +90,17 @@ abstract final class AppRouter {
         GoRoute(
           path: AppRoutes.cart,
           name: 'cart',
-          builder: (context, state) => const PlaceholderScreen(
-            title: 'السلة',
-            icon: Icons.shopping_cart_outlined,
-          ),
+          builder: (context, state) => const CartPage(),
+        ),
+        GoRoute(
+          path: AppRoutes.checkout,
+          name: 'checkout',
+          builder: (context, state) => const CheckoutPage(),
         ),
         GoRoute(
           path: AppRoutes.orders,
           name: 'orders',
-          builder: (context, state) => const PlaceholderScreen(
-            title: 'طلباتي',
-            icon: Icons.receipt_long_outlined,
-          ),
+          builder: (context, state) => const OrdersPage(),
         ),
         GoRoute(
           path: AppRoutes.profile,
