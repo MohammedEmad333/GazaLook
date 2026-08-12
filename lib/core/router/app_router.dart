@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_page.dart';
-import '../../features/home/presentation/pages/home_placeholder_page.dart';
+import '../../features/home/presentation/pages/home_feed_page.dart';
 import '../widgets/placeholder_screen.dart';
 import 'app_routes.dart';
 import 'go_router_refresh_stream.dart';
@@ -48,7 +48,7 @@ abstract final class AppRouter {
         GoRoute(
           path: AppRoutes.home,
           name: 'home',
-          builder: (context, state) => const HomePlaceholderPage(),
+          builder: (context, state) => const HomeFeedPage(),
         ),
         GoRoute(
           path: AppRoutes.login,
@@ -61,11 +61,45 @@ abstract final class AppRouter {
           builder: (context, state) => const OtpPage(),
         ),
         GoRoute(
+          path: AppRoutes.productDetail,
+          name: 'productDetail',
+          builder: (context, state) => PlaceholderScreen(
+            title: 'تفاصيل المنتج',
+            icon: Icons.checkroom_outlined,
+            message: 'رقم المنتج: ${state.pathParameters['id'] ?? ''} '
+                '(المرحلة 4)',
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.categories,
+          name: 'categories',
+          builder: (context, state) => const PlaceholderScreen(
+            title: 'التصنيفات',
+            icon: Icons.category_outlined,
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.wishlist,
+          name: 'wishlist',
+          builder: (context, state) => const PlaceholderScreen(
+            title: 'المفضلة',
+            icon: Icons.favorite_border,
+          ),
+        ),
+        GoRoute(
           path: AppRoutes.cart,
           name: 'cart',
           builder: (context, state) => const PlaceholderScreen(
             title: 'السلة',
             icon: Icons.shopping_cart_outlined,
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.orders,
+          name: 'orders',
+          builder: (context, state) => const PlaceholderScreen(
+            title: 'طلباتي',
+            icon: Icons.receipt_long_outlined,
           ),
         ),
         GoRoute(

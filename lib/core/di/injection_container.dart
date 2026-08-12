@@ -11,6 +11,19 @@ import '../../features/auth/domain/usecases/request_otp.dart';
 import '../../features/auth/domain/usecases/sign_out.dart';
 import '../../features/auth/domain/usecases/verify_otp.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/home/data/datasources/home_remote_datasource.dart';
+import '../../features/home/data/repositories/home_repository_impl.dart';
+import '../../features/home/domain/repositories/home_repository.dart';
+import '../../features/home/domain/usecases/get_banners.dart';
+import '../../features/home/presentation/bloc/home_bloc.dart';
+import '../../features/products/data/datasources/product_remote_datasource.dart';
+import '../../features/products/data/datasources/wishlist_local_datasource.dart';
+import '../../features/products/data/repositories/product_repository_impl.dart';
+import '../../features/products/domain/repositories/product_repository.dart';
+import '../../features/products/domain/usecases/get_product_by_id.dart';
+import '../../features/products/domain/usecases/get_products.dart';
+import '../../features/products/presentation/bloc/products_bloc.dart';
+import '../../features/products/presentation/bloc/wishlist_cubit.dart';
 
 /// Global service locator.
 final GetIt sl = GetIt.instance;
@@ -21,8 +34,10 @@ Future<void> initDependencies() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(prefs);
 
-  // ---- Feature: auth -------------------------------------------------------
+  // ---- Features ------------------------------------------------------------
   _initAuth();
+  _initProducts();
+  _initHome();
 }
 
 void _initAuth() {
@@ -57,4 +72,40 @@ void _initAuth() {
         signOut: sl<SignOut>(),
       ),
     );
+}
+
+void _initProducts() {
+  sl
+    // Data sources
+    ..registerLazySingleton<ProductRemoteDataSource>(
+      () => const MockProductRemoteDataSource(),
+    )
+    ..registerLazySingleton<WishlistLocalDataSource>(
+      () => WishlistLocalDataSourceImpl(sl<SharedPreferences>()),
+    )
+    // Repository
+    ..registerLazySingleton<ProductRepository>(
+      () => ProductRepositoryImpl(remote: sl<ProductRemoteDataSource>()),
+    )
+    // Use cases
+    ..registerLazySingleton(() => GetProducts(sl<ProductRepository>()))
+    ..registerLazySingleton(() => GetProductById(sl<ProductRepository>()))
+    // Catalog grid bloc (fresh per screen)
+    ..registerFactory(() => ProductsBloc(getProducts: sl<GetProducts>()))
+    // Wishlist is app-wide (single source of truth, persisted) → singleton.
+    ..registerLazySingleton(
+      () => WishlistCubit(sl<WishlistLocalDataSource>()),
+    );
+}
+
+void _initHome() {
+  sl
+    ..registerLazySingleton<HomeRemoteDataSource>(
+      () => const MockHomeRemoteDataSource(),
+    )
+    ..registerLazySingleton<HomeRepository>(
+      () => HomeRepositoryImpl(remote: sl<HomeRemoteDataSource>()),
+    )
+    ..registerLazySingleton(() => GetBanners(sl<HomeRepository>()))
+    ..registerFactory(() => HomeBloc(getBanners: sl<GetBanners>()));
 }
