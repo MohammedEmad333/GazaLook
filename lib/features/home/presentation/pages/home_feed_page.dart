@@ -8,7 +8,6 @@ import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../../core/widgets/app_drawer.dart';
 import '../../../products/presentation/bloc/products_bloc.dart';
-import '../../../products/presentation/bloc/wishlist_cubit.dart';
 import '../../../products/presentation/widgets/product_sliver_grid.dart';
 import '../bloc/home_bloc.dart';
 import '../widgets/category_strip.dart';
@@ -34,7 +33,6 @@ class HomeFeedPage extends StatelessWidget {
         BlocProvider<ProductsBloc>(
           create: (_) => sl<ProductsBloc>()..add(const ProductsStarted()),
         ),
-        BlocProvider<WishlistCubit>.value(value: sl<WishlistCubit>()),
       ],
       child: const _HomeView(),
     );

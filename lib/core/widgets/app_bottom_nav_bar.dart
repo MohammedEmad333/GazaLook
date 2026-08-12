@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/cart/domain/entities/cart_item.dart';
+import '../../features/cart/presentation/cubit/cart_cubit.dart';
 import '../router/app_routes.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_dimensions.dart';
@@ -35,6 +38,12 @@ class AppBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Live cart-unit count for the badge (app-wide CartCubit).
+    final int cartCount = context.select(
+      (CartCubit c) =>
+          c.state.fold<int>(0, (int sum, CartItem i) => sum + i.quantity),
+    );
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -53,6 +62,7 @@ class AppBottomNavBar extends StatelessWidget {
                 _NavItem(
                   tab: tab,
                   selected: tab == current,
+                  badgeCount: tab == AppTab.cart ? cartCount : 0,
                   onTap: () {
                     if (tab != current) context.go(tab.route);
                   },
@@ -70,15 +80,24 @@ class _NavItem extends StatelessWidget {
     required this.tab,
     required this.selected,
     required this.onTap,
+    this.badgeCount = 0,
   });
 
   final AppTab tab;
   final bool selected;
   final VoidCallback onTap;
+  final int badgeCount;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final Widget icon = Icon(
+      selected ? tab.activeIcon : tab.icon,
+      size: 24,
+      color: selected
+          ? AppColors.onPrimaryContainer
+          : AppColors.onSurfaceVariant,
+    );
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
@@ -92,13 +111,14 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(
-              selected ? tab.activeIcon : tab.icon,
-              size: 24,
-              color: selected
-                  ? AppColors.onPrimaryContainer
-                  : AppColors.onSurfaceVariant,
-            ),
+            if (badgeCount > 0)
+              Badge(
+                label: Text('$badgeCount'),
+                backgroundColor: AppColors.primary,
+                child: icon,
+              )
+            else
+              icon,
             const SizedBox(height: 2),
             Text(
               tab.label,

@@ -5,6 +5,7 @@ import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_page.dart';
 import '../../features/home/presentation/pages/home_feed_page.dart';
+import '../../features/products/presentation/pages/product_detail_page.dart';
 import '../widgets/placeholder_screen.dart';
 import 'app_routes.dart';
 import 'go_router_refresh_stream.dart';
@@ -63,11 +64,8 @@ abstract final class AppRouter {
         GoRoute(
           path: AppRoutes.productDetail,
           name: 'productDetail',
-          builder: (context, state) => PlaceholderScreen(
-            title: 'تفاصيل المنتج',
-            icon: Icons.checkroom_outlined,
-            message: 'رقم المنتج: ${state.pathParameters['id'] ?? ''} '
-                '(المرحلة 4)',
+          builder: (context, state) => ProductDetailPage(
+            productId: state.pathParameters['id'] ?? '',
           ),
         ),
         GoRoute(

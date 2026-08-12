@@ -8,6 +8,8 @@ import 'core/di/injection_container.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/cart/presentation/cubit/cart_cubit.dart';
+import 'features/products/presentation/bloc/wishlist_cubit.dart';
 
 /// Root widget for GazaLook.
 ///
@@ -40,8 +42,14 @@ class _GazaLookAppState extends State<GazaLookApp> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AuthBloc>.value(
-      value: _authBloc,
+    // App-wide blocs: auth (session/routing), plus the persisted, cross-screen
+    // wishlist and cart singletons so their state is shared everywhere.
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>.value(value: _authBloc),
+        BlocProvider<WishlistCubit>.value(value: sl<WishlistCubit>()),
+        BlocProvider<CartCubit>.value(value: sl<CartCubit>()),
+      ],
       child: MaterialApp.router(
         title: AppConstants.appName,
         debugShowCheckedModeBanner: false,

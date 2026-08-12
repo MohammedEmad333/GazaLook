@@ -11,6 +11,8 @@ import '../../features/auth/domain/usecases/request_otp.dart';
 import '../../features/auth/domain/usecases/sign_out.dart';
 import '../../features/auth/domain/usecases/verify_otp.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/cart/data/datasources/cart_local_datasource.dart';
+import '../../features/cart/presentation/cubit/cart_cubit.dart';
 import '../../features/home/data/datasources/home_remote_datasource.dart';
 import '../../features/home/data/repositories/home_repository_impl.dart';
 import '../../features/home/domain/repositories/home_repository.dart';
@@ -24,6 +26,7 @@ import '../../features/products/domain/usecases/get_product_by_id.dart';
 import '../../features/products/domain/usecases/get_products.dart';
 import '../../features/products/presentation/bloc/products_bloc.dart';
 import '../../features/products/presentation/bloc/wishlist_cubit.dart';
+import '../../features/products/presentation/cubit/product_detail_cubit.dart';
 
 /// Global service locator.
 final GetIt sl = GetIt.instance;
@@ -38,6 +41,7 @@ Future<void> initDependencies() async {
   _initAuth();
   _initProducts();
   _initHome();
+  _initCart();
 }
 
 void _initAuth() {
@@ -92,10 +96,21 @@ void _initProducts() {
     ..registerLazySingleton(() => GetProductById(sl<ProductRepository>()))
     // Catalog grid bloc (fresh per screen)
     ..registerFactory(() => ProductsBloc(getProducts: sl<GetProducts>()))
+    // Product detail cubit (fresh per PDP visit)
+    ..registerFactory(() => ProductDetailCubit(sl<GetProductById>()))
     // Wishlist is app-wide (single source of truth, persisted) → singleton.
     ..registerLazySingleton(
       () => WishlistCubit(sl<WishlistLocalDataSource>()),
     );
+}
+
+void _initCart() {
+  sl
+    ..registerLazySingleton<CartLocalDataSource>(
+      () => CartLocalDataSourceImpl(sl<SharedPreferences>()),
+    )
+    // Cart is app-wide (badge + PDP + cart screen share it), persisted.
+    ..registerLazySingleton(() => CartCubit(sl<CartLocalDataSource>()));
 }
 
 void _initHome() {
