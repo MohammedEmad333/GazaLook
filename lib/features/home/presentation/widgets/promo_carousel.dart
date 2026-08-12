@@ -1,4 +1,5 @@
-import 'package:carousel_slider/carousel_slider.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -10,8 +11,9 @@ import '../bloc/home_bloc.dart';
 
 /// Auto-playing promo banner carousel with a page indicator.
 ///
-/// Handles loading (skeleton) and failure (hidden) states so the home screen
-/// stays clean regardless of banner availability.
+/// Built on a plain [PageView] (no third-party carousel dependency) to stay
+/// lightweight and conflict-free. Handles loading (skeleton) and empty/failure
+/// (hidden) states so the home screen stays clean regardless of availability.
 class PromoCarousel extends StatefulWidget {
   const PromoCarousel({super.key});
 
@@ -20,9 +22,40 @@ class PromoCarousel extends StatefulWidget {
 }
 
 class _PromoCarouselState extends State<PromoCarousel> {
-  int _current = 0;
-
   static const double _height = 180;
+  static const Duration _autoPlayEvery = Duration(seconds: 5);
+
+  final PageController _controller = PageController(viewportFraction: 0.86);
+  Timer? _timer;
+  int _current = 0;
+  int _count = 0;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /// (Re)starts autoplay for [count] banners.
+  void _ensureAutoPlay(int count) {
+    if (count == _count) return;
+    _count = count;
+    _timer?.cancel();
+    if (count > 1) {
+      _timer = Timer.periodic(_autoPlayEvery, (_) => _advance());
+    }
+  }
+
+  void _advance() {
+    if (!_controller.hasClients || _count == 0) return;
+    final int next = (_current + 1) % _count;
+    _controller.animateToPage(
+      next,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,22 +69,21 @@ class _PromoCarouselState extends State<PromoCarousel> {
     if (state.banners.isEmpty) return const SizedBox.shrink();
 
     final List<PromoBanner> banners = state.banners;
+    _ensureAutoPlay(banners.length);
 
     return Column(
       children: <Widget>[
-        CarouselSlider.builder(
-          itemCount: banners.length,
-          options: CarouselOptions(
-            height: _height,
-            viewportFraction: 0.86,
-            enlargeCenterPage: true,
-            autoPlay: true,
-            autoPlayInterval: const Duration(seconds: 5),
-            onPageChanged: (int index, _) =>
-                setState(() => _current = index),
+        SizedBox(
+          height: _height,
+          child: PageView.builder(
+            controller: _controller,
+            itemCount: banners.length,
+            onPageChanged: (int index) => setState(() => _current = index),
+            itemBuilder: (BuildContext context, int index) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: _BannerCard(banner: banners[index]),
+            ),
           ),
-          itemBuilder: (BuildContext context, int index, __) =>
-              _BannerCard(banner: banners[index]),
         ),
         const SizedBox(height: AppDimensions.stackBase),
         _Dots(count: banners.length, active: _current),
