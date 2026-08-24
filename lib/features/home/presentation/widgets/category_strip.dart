@@ -29,7 +29,7 @@ class CategoryStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 96,
+      height: 104,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(
@@ -87,11 +87,17 @@ class _CategoryItem extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            category.labelAr,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-              color: AppColors.onSurfaceVariant,
+          SizedBox(
+            width: 64,
+            child: Text(
+              category.labelAr,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+                color: AppColors.onSurfaceVariant,
+              ),
             ),
           ),
         ],

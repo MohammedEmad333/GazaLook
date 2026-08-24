@@ -27,12 +27,16 @@ class ProductCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          _ImageBlock(product: product),
+          // The image flexes to fill whatever height the grid cell leaves after
+          // the name/price block, so the card never overflows regardless of the
+          // cell's exact height (fixes the "Bottom overflowed" render error).
+          Expanded(child: _ImageBlock(product: product)),
           const SizedBox(height: AppDimensions.stackTight),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Text(
                   product.name,
@@ -59,10 +63,9 @@ class _ImageBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: AppDimensions.productAspectRatio,
-      child: ClipRRect(
-        borderRadius: AppDimensions.borderRadiusXl,
+    return ClipRRect(
+      borderRadius: AppDimensions.borderRadiusXl,
+      child: SizedBox.expand(
         child: Stack(
           fit: StackFit.expand,
           children: <Widget>[

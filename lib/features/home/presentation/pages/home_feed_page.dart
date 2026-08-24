@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
@@ -77,7 +79,12 @@ class _HomeView extends StatelessWidget {
                 AppDimensions.containerMargin,
                 AppDimensions.stackBase,
               ),
-              sliver: const SliverToBoxAdapter(child: HomeSearchBar()),
+              sliver: SliverToBoxAdapter(
+                child: HomeSearchBar(
+                  onTap: () => context.push(AppRoutes.search),
+                  onFilterTap: () => context.push(AppRoutes.search),
+                ),
+              ),
             ),
 
             // Filter chips

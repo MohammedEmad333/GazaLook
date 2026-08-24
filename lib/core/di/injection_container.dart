@@ -28,6 +28,8 @@ import '../../features/products/domain/usecases/get_products.dart';
 import '../../features/products/presentation/bloc/products_bloc.dart';
 import '../../features/products/presentation/bloc/wishlist_cubit.dart';
 import '../../features/products/presentation/cubit/product_detail_cubit.dart';
+import '../../features/products/presentation/cubit/search_cubit.dart';
+import '../../features/products/presentation/cubit/wishlist_products_cubit.dart';
 import '../../features/orders/data/datasources/order_local_datasource.dart';
 import '../../features/orders/data/repositories/order_repository_impl.dart';
 import '../../features/orders/domain/repositories/order_repository.dart';
@@ -106,6 +108,10 @@ void _initProducts() {
     ..registerFactory(() => ProductsBloc(getProducts: sl<GetProducts>()))
     // Product detail cubit (fresh per PDP visit)
     ..registerFactory(() => ProductDetailCubit(sl<GetProductById>()))
+    // Catalog search (fresh per search-screen visit).
+    ..registerFactory(() => SearchCubit(sl<GetProducts>()))
+    // Wishlist catalog loader (fresh per wishlist-screen visit).
+    ..registerFactory(() => WishlistProductsCubit(sl<GetProducts>()))
     // Wishlist is app-wide (single source of truth, persisted) → singleton.
     ..registerLazySingleton(
       () => WishlistCubit(sl<WishlistLocalDataSource>()),

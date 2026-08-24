@@ -9,6 +9,9 @@ import '../../features/cart/presentation/pages/checkout_page.dart';
 import '../../features/home/presentation/pages/home_feed_page.dart';
 import '../../features/orders/presentation/pages/orders_page.dart';
 import '../../features/products/presentation/pages/product_detail_page.dart';
+import '../../features/products/presentation/pages/search_page.dart';
+import '../../features/products/presentation/pages/wishlist_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 import '../widgets/placeholder_screen.dart';
 import 'app_routes.dart';
 import 'go_router_refresh_stream.dart';
@@ -72,6 +75,11 @@ abstract final class AppRouter {
           ),
         ),
         GoRoute(
+          path: AppRoutes.search,
+          name: 'search',
+          builder: (context, state) => const SearchPage(),
+        ),
+        GoRoute(
           path: AppRoutes.categories,
           name: 'categories',
           builder: (context, state) => const PlaceholderScreen(
@@ -82,10 +90,7 @@ abstract final class AppRouter {
         GoRoute(
           path: AppRoutes.wishlist,
           name: 'wishlist',
-          builder: (context, state) => const PlaceholderScreen(
-            title: 'المفضلة',
-            icon: Icons.favorite_border,
-          ),
+          builder: (context, state) => const WishlistPage(),
         ),
         GoRoute(
           path: AppRoutes.cart,
@@ -105,10 +110,7 @@ abstract final class AppRouter {
         GoRoute(
           path: AppRoutes.profile,
           name: 'profile',
-          builder: (context, state) => const PlaceholderScreen(
-            title: 'حسابي',
-            icon: Icons.person_outline,
-          ),
+          builder: (context, state) => const ProfilePage(),
         ),
       ],
       errorBuilder: (context, state) => PlaceholderScreen(
