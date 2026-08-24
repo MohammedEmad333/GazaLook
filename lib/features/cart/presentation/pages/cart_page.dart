@@ -70,6 +70,7 @@ class _EmptyCart extends StatelessWidget {
             message: 'سلة المشتريات فارغة',
             icon: Icons.shopping_cart_outlined,
           ),
+          const SizedBox(height: AppDimensions.componentPadding),
           FilledButton(
             onPressed: onBrowse,
             child: const Text('تصفّح المنتجات'),
