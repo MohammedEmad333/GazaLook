@@ -5,17 +5,24 @@ import '../../../../core/theme/app_dimensions.dart';
 import 'size_guide_sheet.dart';
 
 /// Size chooser row with a "size guide" link that opens a localized sheet.
+///
+/// When [hasError] is set (the shopper tapped add/buy without choosing a size)
+/// the title and chip borders turn to the error colour and a helper line is
+/// shown, so the requirement is visible on the page rather than only in a
+/// transient snackbar.
 class SizeSelector extends StatelessWidget {
   const SizeSelector({
     super.key,
     required this.sizes,
     required this.selected,
     required this.onSelected,
+    this.hasError = false,
   });
 
   final List<String> sizes;
   final String? selected;
   final ValueChanged<String> onSelected;
+  final bool hasError;
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +35,10 @@ class SizeSelector extends StatelessWidget {
           children: <Widget>[
             Text(
               'المقاس',
-              style: theme.textTheme.bodyLarge
-                  ?.copyWith(fontWeight: FontWeight.w600),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: hasError ? AppColors.error : null,
+              ),
             ),
             TextButton.icon(
               onPressed: () => showSizeGuideSheet(context),
@@ -51,10 +60,18 @@ class SizeSelector extends StatelessWidget {
               _SizeChip(
                 label: size,
                 selected: size == selected,
+                hasError: hasError,
                 onTap: () => onSelected(size),
               ),
           ],
         ),
+        if (hasError) ...<Widget>[
+          const SizedBox(height: AppDimensions.stackTight),
+          Text(
+            'يرجى اختيار المقاس للمتابعة',
+            style: theme.textTheme.bodySmall?.copyWith(color: AppColors.error),
+          ),
+        ],
       ],
     );
   }
@@ -65,15 +82,20 @@ class _SizeChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.hasError = false,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final bool hasError;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final Color borderColor = selected
+        ? AppColors.secondary
+        : (hasError ? AppColors.error : AppColors.outlineVariant);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
@@ -85,9 +107,7 @@ class _SizeChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? AppColors.secondaryContainer : null,
           borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
-          border: Border.all(
-            color: selected ? AppColors.secondary : AppColors.outlineVariant,
-          ),
+          border: Border.all(color: borderColor),
         ),
         child: Text(
           label,

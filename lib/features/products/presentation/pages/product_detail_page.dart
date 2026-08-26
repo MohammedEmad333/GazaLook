@@ -48,17 +48,29 @@ class _ProductDetailView extends StatefulWidget {
 class _ProductDetailViewState extends State<_ProductDetailView> {
   String? _selectedSize;
 
+  /// Set when the shopper tries to add/buy before choosing a required size, so
+  /// the size selector can surface the requirement inline (not only a snackbar,
+  /// which is easy to miss — a frequent cause of "I added it but the cart is
+  /// empty" reports).
+  bool _sizeError = false;
+
   bool _requireSizeSatisfied(Product product) =>
       product.sizes.isEmpty || _selectedSize != null;
 
+  void _onSizeSelected(String size) {
+    setState(() {
+      _selectedSize = size;
+      _sizeError = false;
+    });
+  }
+
   void _onAddToCart(Product product, {required bool buyNow}) {
     if (!_requireSizeSatisfied(product)) {
+      setState(() => _sizeError = true);
       _showSnack('يرجى اختيار المقاس');
       return;
     }
-    context
-        .read<CartCubit>()
-        .addItem(product, size: _selectedSize);
+    context.read<CartCubit>().addItem(product, size: _selectedSize);
 
     if (buyNow) {
       context.push(AppRoutes.cart);
@@ -115,8 +127,8 @@ class _ProductDetailViewState extends State<_ProductDetailView> {
               _Content(
                 product: state.product!,
                 selectedSize: _selectedSize,
-                onSizeSelected: (String s) =>
-                    setState(() => _selectedSize = s),
+                sizeError: _sizeError,
+                onSizeSelected: _onSizeSelected,
               ),
           },
         );
@@ -142,11 +154,13 @@ class _Content extends StatelessWidget {
   const _Content({
     required this.product,
     required this.selectedSize,
+    required this.sizeError,
     required this.onSizeSelected,
   });
 
   final Product product;
   final String? selectedSize;
+  final bool sizeError;
   final ValueChanged<String> onSizeSelected;
 
   @override
@@ -199,6 +213,7 @@ class _Content extends StatelessWidget {
                 SizeSelector(
                   sizes: product.sizes,
                   selected: selectedSize,
+                  hasError: sizeError,
                   onSelected: onSizeSelected,
                 ),
                 const Divider(height: AppDimensions.sectionGap),
