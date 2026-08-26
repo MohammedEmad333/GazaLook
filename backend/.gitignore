@@ -4,3 +4,4 @@ config.local.php
 
 # Composer (optional; the app ships a plain autoloader)
 /vendor/
+dist/
