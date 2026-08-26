@@ -146,6 +146,29 @@ curl -s -X POST localhost:8000/api/admin/transactions/1/approve \
   -H 'Content-Type: application/json' -d '{"admin_id":2}'
 ```
 
+## Where to deploy
+
+It's plain PHP + MySQL, so almost anything runs it. Ranked for this project
+(audience in Gaza → pick a nearby region: Frankfurt / EU or the Middle East for
+low latency, and prefer a provider with reliable uptime):
+
+1. **Small VPS (recommended for control)** — Hetzner (Frankfurt) or DigitalOcean:
+   Nginx + PHP-FPM + MySQL, HTTPS via Let's Encrypt. ~$5–6/mo, full control over
+   receipts storage, cron, and the future admin panel. Best balance for an MVP.
+2. **Managed shared/cPanel PHP hosting** — zero ops, cheapest, one-click MySQL +
+   Let's Encrypt. Good if you want to avoid server admin; less control.
+3. **Container PaaS** — Render / Railway / Fly.io (Dockerize `public/` behind
+   PHP-FPM) with a managed MySQL. Easy CI deploys; watch cold starts/pricing.
+4. **Google Cloud Run + Cloud SQL** — fits if you also adopt Firebase for auth;
+   heavier to set up than the above.
+
+Whichever you pick:
+- Serve `public/` as the web root; **only** `public/index.php` is exposed.
+- Terminate **HTTPS** and restrict CORS to the app's origin.
+- Set the `DB_*` env vars (never commit secrets — the code already reads env).
+- Store receipt screenshots on object storage or a persistent disk (not in git).
+- Enable daily MySQL backups.
+
 ## Tests
 
 A dependency-free smoke test runs the real services against in-memory SQLite:
