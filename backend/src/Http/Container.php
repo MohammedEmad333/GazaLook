@@ -10,6 +10,7 @@ use GazaLook\Wallet\Payment\Strategies\BankOfPalestineStrategy;
 use GazaLook\Wallet\Payment\Strategies\JawwalPayStrategy;
 use GazaLook\Wallet\Payment\Strategies\ManualReceiptUploadStrategy;
 use GazaLook\Wallet\Repository\ChannelRepository;
+use GazaLook\Wallet\Repository\ProductRepository;
 use GazaLook\Wallet\Repository\TransactionRepository;
 use GazaLook\Wallet\Repository\WalletRepository;
 use GazaLook\Wallet\Wallet\WalletService;
@@ -65,5 +66,10 @@ final class Container
     public function adminController(): AdminController
     {
         return new AdminController($this->walletService, $this->transactions);
+    }
+
+    public function productController(): ProductController
+    {
+        return new ProductController(new ProductRepository($this->db));
     }
 }

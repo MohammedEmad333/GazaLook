@@ -1,9 +1,29 @@
-# GazaLook — Wallet & Balance Top-up Backend
+# GazaLook — Backend (Products API + Wallet & Top-up)
 
-Backend for the **user wallet + digital balance top-up** feature
-(Trello card *"ربط طرق الدفع"*). Plain PHP 8.1+ and MySQL — no framework — with
-a **Strategy Pattern** so today's manual review can become tomorrow's automatic
-gateway without touching the wallet, ledger, or API.
+Plain PHP 8.1+ and MySQL — no framework — serving two features:
+
+- **Products catalogue API** — the real data source that replaces the app's
+  bundled demo catalog (Trello card *"باك-إند حقيقي للمنتجات"*). Responses are
+  already in the Flutter `ProductModel` shape, so the app's
+  `ProductRemoteDataSource` is the only swap point.
+- **User wallet + digital balance top-up** (Trello card *"ربط طرق الدفع"*),
+  built around a **Strategy Pattern** so today's manual receipt review can
+  become tomorrow's automatic gateway without touching the wallet, ledger or API.
+
+## Products API
+
+| Method & path | Purpose |
+|---|---|
+| `GET /api/products` | full catalogue (app `ProductModel` shape) |
+| `GET /api/products/{id}` | one product, or 404 |
+
+Schema + seed (the 12 launch products): `database/products_schema.sql`. The
+Flutter app calls this only when built with `--dart-define=API_BASE_URL=...`;
+with no base URL it uses the bundled catalog, so it stays functional offline.
+
+---
+
+## Wallet & balance top-up
 
 ## Two phases, one design
 
@@ -104,8 +124,9 @@ against double-clicks or retries. Approval of a `credit` transaction adds
 ## Running it
 
 ```bash
-# 1. Create the schema
+# 1. Create the schema (wallet + products)
 mysql -u root gazalook < database/schema.sql
+mysql -u root gazalook < database/products_schema.sql
 
 # 2. Configure the DB connection (no secrets in source)
 export DB_HOST=127.0.0.1 DB_NAME=gazalook DB_USER=gazalook DB_PASS=secret
@@ -114,6 +135,8 @@ export DB_HOST=127.0.0.1 DB_NAME=gazalook DB_USER=gazalook DB_PASS=secret
 php -S 127.0.0.1:8000 -t public
 
 # 4. Try it
+curl -s localhost:8000/api/products
+curl -s localhost:8000/api/products/p1
 curl -s localhost:8000/api/wallet/channels
 curl -s -X POST localhost:8000/api/wallet/top-up \
   -H 'Content-Type: application/json' \

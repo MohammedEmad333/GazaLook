@@ -47,10 +47,18 @@ $userId = 1;
 $adminId = 2;
 $channelId = 1;
 
+// Seed two catalog products.
+$pdo->exec("INSERT INTO products
+    (id, name, price, old_price, image_url, category, sizes, rating, rating_count, is_local, in_stock, sort_order)
+    VALUES
+    ('p1','فستان صيفي حريري',120,NULL,'https://img/p1','women','[\"S\",\"M\",\"L\"]',4.8,124,1,1,1),
+    ('p3','قميص كتان خفيف',95,130,'https://img/p3','men','[\"M\",\"L\"]',4.4,61,0,1,2)");
+
 Connection::set($pdo);
 $container = new Container($pdo);
 $wallet = $container->walletController();
 $admin = $container->adminController();
+$products = $container->productController();
 
 echo "Money conversion" . PHP_EOL;
 check('25.50 ₪ → 2550 units', Money::toUnits(25.50) === 2550);
@@ -111,6 +119,15 @@ $reject = $admin->reject($txn2, $adminId, 'blurry receipt');
 check('reject applied', ($reject->body['data']['applied'] ?? false) === true);
 $bal = $wallet->balance($userId);
 check('balance unchanged after rejection', ($bal->body['data']['balance_units'] ?? -1) === 5000);
+
+echo "Products API" . PHP_EOL;
+$list = $products->list();
+check('lists all products', count($list->body['data']['products']) === 2);
+$first = $list->body['data']['products'][0];
+check('product JSON uses ProductModel keys', isset($first['imageUrl'], $first['ratingCount'], $first['inStock']));
+check('sizes decoded to a list', is_array($first['sizes']) && $first['sizes'] === ['S', 'M', 'L']);
+check('isOnOffer product exposes oldPrice', ($products->show('p3')->body['data']['product']['oldPrice'] ?? null) === 130.0);
+check('unknown product → 404', $products->show('nope')->status === 404);
 
 echo PHP_EOL . ($failures === 0
     ? "All backend smoke checks passed ✅" . PHP_EOL

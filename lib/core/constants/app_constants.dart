@@ -4,6 +4,16 @@ abstract final class AppConstants {
 
   static const String appName = 'GazaLook';
 
+  /// Base URL of the GazaLook backend API (see /backend). Supplied at build
+  /// time, e.g. `flutter build apk --dart-define=API_BASE_URL=https://api.gazalook.ps`.
+  /// When empty, the app falls back to the bundled demo catalog so it stays
+  /// fully functional offline and in CI.
+  static const String apiBaseUrl =
+      String.fromEnvironment('API_BASE_URL', defaultValue: '');
+
+  /// Whether a real backend is configured.
+  static bool get hasApiBackend => apiBaseUrl.isNotEmpty;
+
   /// Currency: Israeli Shekel.
   static const String currencySymbol = '₪';
   static const String currencyCode = 'ILS';

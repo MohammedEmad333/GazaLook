@@ -6,6 +6,8 @@ declare(strict_types=1);
  * Front controller + tiny router for the GazaLook wallet API.
  *
  * Routes (JSON in / JSON out):
+ *   GET  /api/products
+ *   GET  /api/products/{id}
  *   GET  /api/wallet/channels
  *   GET  /api/wallet/balance?user_id=..
  *   GET  /api/wallet/transactions?user_id=..
@@ -45,8 +47,14 @@ try {
     $container = new Container();
     $response = null;
 
+    // GET /api/products/{id}
+    if ($method === 'GET'
+        && preg_match('#^/api/products/([A-Za-z0-9_-]+)$#', $path, $pm) === 1
+    ) {
+        $response = $container->productController()->show($pm[1]);
+    }
     // POST /api/admin/transactions/{id}/approve|reject
-    if ($method === 'POST'
+    elseif ($method === 'POST'
         && preg_match('#^/api/admin/transactions/(\d+)/(approve|reject)$#', $path, $m) === 1
     ) {
         $body = $readJsonBody();
@@ -59,6 +67,7 @@ try {
             : $admin->reject($txnId, $adminId, $note);
     } else {
         $response = match ("{$method} {$path}") {
+            'GET /api/products' => $container->productController()->list(),
             'GET /api/wallet/channels' => $container->walletController()->channels(),
             'GET /api/wallet/balance' => $container->walletController()
                 ->balance((int) ($_GET['user_id'] ?? 0)),
