@@ -162,6 +162,23 @@ low latency, and prefer a provider with reliable uptime):
 4. **Google Cloud Run + Cloud SQL** — fits if you also adopt Firebase for auth;
    heavier to set up than the above.
 
+### Free options (MVP / testing)
+
+- **Oracle Cloud — Always Free** (best "real server", no time limit): a free
+  Ampere/ARM VM (regions incl. Frankfurt & Jeddah — close to Gaza). Install
+  LAMP + Let's Encrypt and you get a genuine always-on VPS for €0. Most setup,
+  best result.
+- **InfinityFree** (easiest, zero-ops): free PHP + MySQL + cPanel + free SSL +
+  subdomain, no credit card. Great to get the API online in minutes. Caveats:
+  shared limits, no SSH, limited/unreliable cron, and outbound calls are often
+  blocked (fine for Phase 1; matters for Phase-2 gateways).
+- **Fly.io / Render** (container PaaS free tiers): Dockerize PHP-FPM; note free
+  web services sleep on inactivity (cold starts) and free MySQL is limited —
+  usually pair with an external free DB.
+
+For production later, move to the paid VPS above — free tiers throttle traffic,
+limit storage (receipts), and don't guarantee uptime.
+
 Whichever you pick:
 - Serve `public/` as the web root; **only** `public/index.php` is exposed.
 - Terminate **HTTPS** and restrict CORS to the app's origin.
