@@ -1,0 +1,19 @@
+{
+    "name": "gazalook/wallet-backend",
+    "description": "GazaLook user wallet & balance top-up backend (manual receipt review + gateway-ready Strategy Pattern).",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.1",
+        "ext-pdo": "*",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "GazaLook\\Wallet\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}
