@@ -4,12 +4,14 @@ abstract final class AppConstants {
 
   static const String appName = 'GazaLook';
 
-  /// Base URL of the GazaLook backend API (see /backend). Supplied at build
-  /// time, e.g. `flutter build apk --dart-define=API_BASE_URL=https://api.gazalook.ps`.
-  /// When empty, the app falls back to the bundled demo catalog so it stays
-  /// fully functional offline and in CI.
-  static const String apiBaseUrl =
-      String.fromEnvironment('API_BASE_URL', defaultValue: '');
+  /// Base URL of the GazaLook backend API (see /backend). Defaults to the live
+  /// InfinityFree deployment; override at build time with
+  /// `flutter build apk --dart-define=API_BASE_URL=https://your-host`.
+  /// Set to an empty define to force the bundled demo catalog instead.
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://gazalook.great-site.net',
+  );
 
   /// Whether a real backend is configured.
   static bool get hasApiBackend => apiBaseUrl.isNotEmpty;
