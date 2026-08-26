@@ -32,6 +32,11 @@ class ProfilePage extends StatelessWidget {
           const SizedBox(height: AppDimensions.sectionGap),
 
           _MenuTile(
+            icon: Icons.account_balance_wallet_outlined,
+            label: 'محفظتي وشحن الرصيد',
+            onTap: () => context.push(AppRoutes.wallet),
+          ),
+          _MenuTile(
             icon: Icons.receipt_long_outlined,
             label: 'طلباتي',
             onTap: () => context.push(AppRoutes.orders),

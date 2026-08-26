@@ -12,6 +12,8 @@ import '../../features/products/presentation/pages/product_detail_page.dart';
 import '../../features/products/presentation/pages/search_page.dart';
 import '../../features/products/presentation/pages/wishlist_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/wallet/presentation/pages/top_up_page.dart';
+import '../../features/wallet/presentation/pages/wallet_page.dart';
 import '../widgets/placeholder_screen.dart';
 import 'app_routes.dart';
 import 'go_router_refresh_stream.dart';
@@ -111,6 +113,18 @@ abstract final class AppRouter {
           path: AppRoutes.profile,
           name: 'profile',
           builder: (context, state) => const ProfilePage(),
+        ),
+        GoRoute(
+          path: AppRoutes.wallet,
+          name: 'wallet',
+          builder: (context, state) => const WalletPage(),
+          routes: <RouteBase>[
+            GoRoute(
+              path: 'top-up',
+              name: 'walletTopUp',
+              builder: (context, state) => const TopUpPage(),
+            ),
+          ],
         ),
       ],
       errorBuilder: (context, state) => PlaceholderScreen(

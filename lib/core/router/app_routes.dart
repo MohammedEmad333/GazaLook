@@ -27,4 +27,8 @@ abstract final class AppRoutes {
   static const String orders = '/orders';
   static const String wishlist = '/wishlist';
   static const String profile = '/profile';
+
+  // Wallet & top-up
+  static const String wallet = '/wallet';
+  static const String walletTopUp = '/wallet/top-up';
 }
