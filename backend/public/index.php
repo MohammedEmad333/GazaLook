@@ -21,10 +21,29 @@ declare(strict_types=1);
  * read from the request body/query.
  */
 
-require __DIR__ . '/../autoload.php';
-
 use GazaLook\Wallet\Http\Container;
 use GazaLook\Wallet\Http\JsonResponse;
+
+// Locate autoload.php across layouts: local dev (`public/` + `../autoload.php`)
+// and shared hosting where index.php sits in htdocs and the app code lives in
+// `htdocs/app/` (see backend/DEPLOY_INFINITYFREE.md). `use` aliases above are
+// only resolved when the classes are first referenced (after autoload runs).
+(static function (): void {
+    foreach ([
+        __DIR__ . '/../autoload.php', // local: backend/public → backend/autoload.php
+        __DIR__ . '/app/autoload.php', // shared host: htdocs/index.php → htdocs/app/autoload.php
+        __DIR__ . '/autoload.php',
+    ] as $candidate) {
+        if (is_file($candidate)) {
+            require $candidate;
+            return;
+        }
+    }
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['ok' => false, 'error' => 'autoload not found']);
+    exit;
+})();
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $path = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/');

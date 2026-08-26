@@ -1,0 +1,29 @@
+# GazaLook API — Apache front controller + hardening.
+# Works on InfinityFree and most shared/Apache hosts. Place this in the web
+# root (htdocs) alongside index.php.
+
+# --- HTTPS redirect (InfinityFree issues free SSL; force it) ------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Route every request that is not a real file/dir to the front controller,
+    # so /api/... reaches index.php.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# --- Never serve the application code, config or SQL over HTTP ----------------
+<FilesMatch "\.(sql|md|json|lock)$">
+    Require all denied
+</FilesMatch>
+
+RedirectMatch 404 ^/app/
+RedirectMatch 404 ^/config\.php$
+
+# Default document
+DirectoryIndex index.php
