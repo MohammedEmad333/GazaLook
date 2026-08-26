@@ -51,6 +51,10 @@ if ($path === '') {
     $path = '/';
 }
 
+// Emit the shortest exact float representation (e.g. 4.8, not 4.79999…) on
+// hosts whose php.ini still defaults serialize_precision to 17.
+ini_set('serialize_precision', '-1');
+
 /** @return array<string,mixed> */
 $readJsonBody = static function (): array {
     $raw = file_get_contents('php://input') ?: '';

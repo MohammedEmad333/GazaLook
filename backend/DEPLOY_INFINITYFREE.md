@@ -9,6 +9,23 @@ Step-by-step guide to put the products + wallet API online for free on
 
 ---
 
+## Single-file option (easiest on mobile)
+
+If your file manager can't extract zips (InfinityFree's web one can't), skip the
+`app/` folder entirely: run `bash build-single-file.sh` to bundle the whole
+backend into one `dist/index.php`, then upload just **three files** to `htdocs`:
+
+```
+htdocs/
+  index.php     ← dist/index.php (the whole API in one file)
+  .htaccess     ← public/.htaccess
+  config.php    ← your DB credentials (from config.sample.php)
+```
+
+`config.php` must sit next to `index.php` (the code auto-detects it there). The
+rest of this guide — DB creation, phpMyAdmin import, SSL, testing, pointing the
+app — is identical. The multi-file layout below is the alternative.
+
 ## 0. What you'll end up with
 
 ```

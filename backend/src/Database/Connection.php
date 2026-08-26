@@ -55,8 +55,12 @@ final class Connection
             ];
         }
 
-        // config.php may sit next to the app code or one level up (htdocs/app).
+        // config.php location depends on the deployment layout:
+        //   • single-file build: index.php + config.php in the web root → __DIR__/config.php
+        //   • multi-file build: htdocs/app/src/Database/Connection.php → htdocs/config.php
         foreach ([
+            __DIR__ . '/config.php',
+            __DIR__ . '/../config.php',
             __DIR__ . '/../../config.php',
             __DIR__ . '/../../../config.php',
         ] as $path) {
