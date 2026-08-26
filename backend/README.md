@@ -172,6 +172,7 @@ low latency, and prefer a provider with reliable uptime):
   subdomain, no credit card. Great to get the API online in minutes. Caveats:
   shared limits, no SSH, limited/unreliable cron, and outbound calls are often
   blocked (fine for Phase 1; matters for Phase-2 gateways).
+  **→ Step-by-step guide: [`DEPLOY_INFINITYFREE.md`](DEPLOY_INFINITYFREE.md).**
 - **Fly.io / Render** (container PaaS free tiers): Dockerize PHP-FPM; note free
   web services sleep on inactivity (cold starts) and free MySQL is limited —
   usually pair with an external free DB.
