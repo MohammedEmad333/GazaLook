@@ -32,6 +32,26 @@ CREATE TABLE payment_channels (
   created_at  TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE products (
+  id           TEXT PRIMARY KEY,
+  name         TEXT NOT NULL,
+  price        REAL NOT NULL,
+  old_price    REAL,
+  image_url    TEXT NOT NULL,
+  category     TEXT NOT NULL,
+  description  TEXT,
+  images       TEXT,
+  sizes        TEXT,
+  rating       REAL NOT NULL DEFAULT 0,
+  rating_count INTEGER NOT NULL DEFAULT 0,
+  is_local     INTEGER NOT NULL DEFAULT 0,
+  in_stock     INTEGER NOT NULL DEFAULT 1,
+  store_name   TEXT,
+  sort_order   INTEGER NOT NULL DEFAULT 0,
+  created_at   TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at   TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE wallet_transactions (
   id               INTEGER PRIMARY KEY AUTOINCREMENT,
   wallet_id        INTEGER NOT NULL REFERENCES wallets (id) ON DELETE CASCADE,

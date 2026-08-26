@@ -1,9 +1,29 @@
-# GazaLook — Wallet & Balance Top-up Backend
+# GazaLook — Backend (Products API + Wallet & Top-up)
 
-Backend for the **user wallet + digital balance top-up** feature
-(Trello card *"ربط طرق الدفع"*). Plain PHP 8.1+ and MySQL — no framework — with
-a **Strategy Pattern** so today's manual review can become tomorrow's automatic
-gateway without touching the wallet, ledger, or API.
+Plain PHP 8.1+ and MySQL — no framework — serving two features:
+
+- **Products catalogue API** — the real data source that replaces the app's
+  bundled demo catalog (Trello card *"باك-إند حقيقي للمنتجات"*). Responses are
+  already in the Flutter `ProductModel` shape, so the app's
+  `ProductRemoteDataSource` is the only swap point.
+- **User wallet + digital balance top-up** (Trello card *"ربط طرق الدفع"*),
+  built around a **Strategy Pattern** so today's manual receipt review can
+  become tomorrow's automatic gateway without touching the wallet, ledger or API.
+
+## Products API
+
+| Method & path | Purpose |
+|---|---|
+| `GET /api/products` | full catalogue (app `ProductModel` shape) |
+| `GET /api/products/{id}` | one product, or 404 |
+
+Schema + seed (the 12 launch products): `database/products_schema.sql`. The
+Flutter app calls this only when built with `--dart-define=API_BASE_URL=...`;
+with no base URL it uses the bundled catalog, so it stays functional offline.
+
+---
+
+## Wallet & balance top-up
 
 ## Two phases, one design
 
@@ -104,8 +124,9 @@ against double-clicks or retries. Approval of a `credit` transaction adds
 ## Running it
 
 ```bash
-# 1. Create the schema
+# 1. Create the schema (wallet + products)
 mysql -u root gazalook < database/schema.sql
+mysql -u root gazalook < database/products_schema.sql
 
 # 2. Configure the DB connection (no secrets in source)
 export DB_HOST=127.0.0.1 DB_NAME=gazalook DB_USER=gazalook DB_PASS=secret
@@ -114,6 +135,8 @@ export DB_HOST=127.0.0.1 DB_NAME=gazalook DB_USER=gazalook DB_PASS=secret
 php -S 127.0.0.1:8000 -t public
 
 # 4. Try it
+curl -s localhost:8000/api/products
+curl -s localhost:8000/api/products/p1
 curl -s localhost:8000/api/wallet/channels
 curl -s -X POST localhost:8000/api/wallet/top-up \
   -H 'Content-Type: application/json' \
@@ -122,6 +145,46 @@ curl -s localhost:8000/api/admin/transactions/pending
 curl -s -X POST localhost:8000/api/admin/transactions/1/approve \
   -H 'Content-Type: application/json' -d '{"admin_id":2}'
 ```
+
+## Where to deploy
+
+It's plain PHP + MySQL, so almost anything runs it. Ranked for this project
+(audience in Gaza → pick a nearby region: Frankfurt / EU or the Middle East for
+low latency, and prefer a provider with reliable uptime):
+
+1. **Small VPS (recommended for control)** — Hetzner (Frankfurt) or DigitalOcean:
+   Nginx + PHP-FPM + MySQL, HTTPS via Let's Encrypt. ~$5–6/mo, full control over
+   receipts storage, cron, and the future admin panel. Best balance for an MVP.
+2. **Managed shared/cPanel PHP hosting** — zero ops, cheapest, one-click MySQL +
+   Let's Encrypt. Good if you want to avoid server admin; less control.
+3. **Container PaaS** — Render / Railway / Fly.io (Dockerize `public/` behind
+   PHP-FPM) with a managed MySQL. Easy CI deploys; watch cold starts/pricing.
+4. **Google Cloud Run + Cloud SQL** — fits if you also adopt Firebase for auth;
+   heavier to set up than the above.
+
+### Free options (MVP / testing)
+
+- **Oracle Cloud — Always Free** (best "real server", no time limit): a free
+  Ampere/ARM VM (regions incl. Frankfurt & Jeddah — close to Gaza). Install
+  LAMP + Let's Encrypt and you get a genuine always-on VPS for €0. Most setup,
+  best result.
+- **InfinityFree** (easiest, zero-ops): free PHP + MySQL + cPanel + free SSL +
+  subdomain, no credit card. Great to get the API online in minutes. Caveats:
+  shared limits, no SSH, limited/unreliable cron, and outbound calls are often
+  blocked (fine for Phase 1; matters for Phase-2 gateways).
+- **Fly.io / Render** (container PaaS free tiers): Dockerize PHP-FPM; note free
+  web services sleep on inactivity (cold starts) and free MySQL is limited —
+  usually pair with an external free DB.
+
+For production later, move to the paid VPS above — free tiers throttle traffic,
+limit storage (receipts), and don't guarantee uptime.
+
+Whichever you pick:
+- Serve `public/` as the web root; **only** `public/index.php` is exposed.
+- Terminate **HTTPS** and restrict CORS to the app's origin.
+- Set the `DB_*` env vars (never commit secrets — the code already reads env).
+- Store receipt screenshots on object storage or a persistent disk (not in git).
+- Enable daily MySQL backups.
 
 ## Tests
 

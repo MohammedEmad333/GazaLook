@@ -1,5 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../constants/app_constants.dart';
+import '../../features/products/data/datasources/api_product_remote_datasource.dart';
 
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
@@ -47,6 +51,16 @@ Future<void> initDependencies() async {
   // ---- External ------------------------------------------------------------
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(prefs);
+
+  // HTTP client for the backend API (low-bandwidth friendly timeouts).
+  sl.registerLazySingleton<Dio>(
+    () => Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 20),
+      ),
+    ),
+  );
 
   // ---- Features ------------------------------------------------------------
   _initAuth();
@@ -102,9 +116,16 @@ void _initAuth() {
 
 void _initProducts() {
   sl
-    // Data sources
+    // Data sources — use the real API when an API_BASE_URL is configured at
+    // build time, otherwise fall back to the bundled demo catalog. This is the
+    // isolated swap point; the repository and everything above are unchanged.
     ..registerLazySingleton<ProductRemoteDataSource>(
-      () => const MockProductRemoteDataSource(),
+      () => AppConstants.hasApiBackend
+          ? ApiProductRemoteDataSource(
+              dio: sl<Dio>(),
+              baseUrl: AppConstants.apiBaseUrl,
+            )
+          : const MockProductRemoteDataSource(),
     )
     ..registerLazySingleton<WishlistLocalDataSource>(
       () => WishlistLocalDataSourceImpl(sl<SharedPreferences>()),
