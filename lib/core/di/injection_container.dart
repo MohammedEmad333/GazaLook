@@ -36,6 +36,8 @@ import '../../features/orders/domain/repositories/order_repository.dart';
 import '../../features/orders/domain/usecases/get_orders.dart';
 import '../../features/orders/domain/usecases/place_order.dart';
 import '../../features/orders/presentation/cubit/orders_cubit.dart';
+import '../../features/wallet/data/datasources/wallet_datasource.dart';
+import '../../features/wallet/presentation/cubit/wallet_cubit.dart';
 
 /// Global service locator.
 final GetIt sl = GetIt.instance;
@@ -52,6 +54,16 @@ Future<void> initDependencies() async {
   _initHome();
   _initCart();
   _initOrders();
+  _initWallet();
+}
+
+void _initWallet() {
+  sl
+    ..registerLazySingleton<WalletDataSource>(
+      () => MockWalletDataSource(sl<SharedPreferences>()),
+    )
+    // App-wide wallet (balance + history shared across wallet/top-up screens).
+    ..registerLazySingleton(() => WalletCubit(sl<WalletDataSource>()));
 }
 
 void _initAuth() {
