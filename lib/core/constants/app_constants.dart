@@ -10,7 +10,7 @@ abstract final class AppConstants {
   /// Set to an empty define to force the bundled demo catalog instead.
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://gazalook.great-site.net',
+    defaultValue: 'https://gazalook.alwaysdata.net',
   );
 
   /// Whether a real backend is configured.
