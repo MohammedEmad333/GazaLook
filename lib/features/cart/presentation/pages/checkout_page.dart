@@ -392,6 +392,12 @@ class _PlaceOrderBar extends StatelessWidget {
               ),
               const Spacer(),
               FilledButton.icon(
+                // See CartPage: the themed `minimumSize` leaves width unbounded,
+                // which throws "forces an infinite width" for a non-flex Row
+                // child. Pin a finite minimum width so it hugs its content.
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(0, AppDimensions.buttonHeight),
+                ),
                 onPressed: submitting ? null : onPlace,
                 icon: submitting
                     ? const SizedBox(

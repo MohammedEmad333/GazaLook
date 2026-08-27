@@ -119,6 +119,15 @@ class _CartSummaryBar extends StatelessWidget {
             ),
             const Spacer(),
             FilledButton.icon(
+              // The global filledButton theme sets `minimumSize` via
+              // `Size.fromHeight`, which leaves the width unbounded (infinity).
+              // As a non-flex child of this Row the button is measured with
+              // unbounded width, so that infinity propagates and layout throws
+              // ("BoxConstraints forces an infinite width"), freezing the cart.
+              // Pin a finite minimum width so it sizes to its content instead.
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(0, AppDimensions.buttonHeight),
+              ),
               onPressed: onCheckout,
               icon: const Icon(Icons.arrow_back, size: 18),
               label: Text('المتابعة للدفع ($itemCount)'),
