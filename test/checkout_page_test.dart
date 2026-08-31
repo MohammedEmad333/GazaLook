@@ -91,11 +91,17 @@ void main() {
       );
       addTearDown(cart.close);
 
+      // Use a tall surface so the whole scrollable form fits without the
+      // ListView lazily dropping off-screen sections.
+      tester.view.physicalSize = const Size(1080, 3200);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
       await tester.pumpWidget(_wrap(cart));
       await tester.pumpAndSettle();
 
-      // Regression: a layout/build throw here previously left the checkout
-      // body blank (only the bottom bar painted).
+      // Regression: the total Column in the bottom bar used to expand to full
+      // height and collapse the body to zero, so no section rendered at all.
       expect(tester.takeException(), isNull);
 
       // The three sections and the CTA are all present.
