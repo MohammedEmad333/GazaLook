@@ -104,11 +104,13 @@ void main() {
       // height and collapse the body to zero, so no section rendered at all.
       expect(tester.takeException(), isNull);
 
-      // The three sections and the CTA are all present.
+      // The three sections all render (they collapsed to nothing before the
+      // fix).
       expect(find.text('التوصيل'), findsOneWidget);
       expect(find.text('طريقة الدفع'), findsOneWidget);
       expect(find.text('ملخص الطلب'), findsOneWidget);
-      expect(find.text('إتمام الطلب'), findsOneWidget);
+      // 'إتمام الطلب' is both the AppBar title and the CTA label, so ≥1.
+      expect(find.text('إتمام الطلب'), findsWidgets);
     },
   );
 }
