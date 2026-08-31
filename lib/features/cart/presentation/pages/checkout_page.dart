@@ -382,6 +382,11 @@ class _PlaceOrderBar extends StatelessWidget {
           child: Row(
             children: <Widget>[
               Column(
+                // A bottomNavigationBar is laid out with a loose, full-height
+                // constraint. Without min, this Column expands to fill the whole
+                // screen, squeezing the checkout body to zero height (blank page
+                // with the total pushed to the top). Shrink-wrap to its content.
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text('الإجمالي', style: theme.textTheme.bodySmall),
