@@ -13,6 +13,11 @@ abstract final class AppRoutes {
   // Home & catalog (Phase 3)
   static const String home = '/';
   static const String categories = '/categories';
+  static const String categoryProducts = '/category/:filter';
+
+  /// Path to the product listing for a catalog filter (e.g. `women`, `offers`).
+  static String categoryProductsPath(String filterName) =>
+      '/category/$filterName';
   static const String search = '/search';
 
   // Products (Phase 4)

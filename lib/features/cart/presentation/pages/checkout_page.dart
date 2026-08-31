@@ -108,6 +108,7 @@ class _CheckoutViewState extends State<_CheckoutView> {
                     const _FieldLabel('المحافظة'),
                     DropdownButtonFormField<Governorate>(
                       value: state.governorate,
+                      isExpanded: true,
                       items: <DropdownMenuItem<Governorate>>[
                         for (final Governorate g in Governorate.values)
                           DropdownMenuItem<Governorate>(
@@ -210,7 +211,7 @@ class _SectionCard extends StatelessWidget {
             children: <Widget>[
               Icon(icon, size: 20, color: AppColors.onSurface),
               const SizedBox(width: AppDimensions.stackBase),
-              Text(title, style: theme.textTheme.headlineMedium),
+              Expanded(child: Text(title, style: theme.textTheme.headlineMedium)),
             ],
           ),
           const SizedBox(height: AppDimensions.componentPadding),
@@ -338,7 +339,8 @@ class _SummaryRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Text(label, style: style),
+          Expanded(child: Text(label, style: style)),
+          const SizedBox(width: AppDimensions.stackBase),
           Text(
             value,
             style: emphasize
@@ -380,6 +382,11 @@ class _PlaceOrderBar extends StatelessWidget {
           child: Row(
             children: <Widget>[
               Column(
+                // A bottomNavigationBar is laid out with a loose, full-height
+                // constraint. Without min, this Column expands to fill the whole
+                // screen, squeezing the checkout body to zero height (blank page
+                // with the total pushed to the top). Shrink-wrap to its content.
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text('الإجمالي', style: theme.textTheme.bodySmall),
