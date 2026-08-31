@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/utils/arabic_text.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/usecases/get_products.dart';
 
@@ -48,11 +49,13 @@ class SearchCubit extends Cubit<SearchState> {
     // The query may have changed while the catalog was loading; keep the latest.
     if (state.query != query) return;
 
-    final String needle = query.toLowerCase();
+    // Arabic-aware match: fold alef/taa-marbuta/diacritic variants so shoppers
+    // find products however they spell the query (see [ArabicText]).
+    final String needle = ArabicText.normalize(query);
     final List<Product> matches = _catalog
         .where((Product p) =>
-            p.name.toLowerCase().contains(needle) ||
-            p.description.toLowerCase().contains(needle))
+            ArabicText.normalize(p.name).contains(needle) ||
+            ArabicText.normalize(p.description).contains(needle))
         .toList(growable: false);
 
     emit(

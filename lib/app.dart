@@ -55,6 +55,21 @@ class _GazaLookAppState extends State<GazaLookApp> {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         routerConfig: _router,
+        // Keep the layout intact on modest devices: honour the user's font-size
+        // preference but clamp extreme scaling so cards, prices and RTL badges
+        // don't overflow at either end.
+        builder: (BuildContext context, Widget? child) {
+          final MediaQueryData media = MediaQuery.of(context);
+          return MediaQuery(
+            data: media.copyWith(
+              textScaler: media.textScaler.clamp(
+                minScaleFactor: 0.85,
+                maxScaleFactor: 1.4,
+              ),
+            ),
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
         locale: const Locale('ar'),
         supportedLocales: const <Locale>[
           Locale('ar'),
