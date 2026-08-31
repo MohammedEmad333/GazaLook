@@ -20,7 +20,22 @@ class CartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('سلة المشتريات')),
+      appBar: AppBar(
+        title: const Text('سلة المشتريات'),
+        actions: <Widget>[
+          // Show "empty cart" only when there's something to clear.
+          BlocBuilder<CartCubit, List<CartItem>>(
+            builder: (BuildContext context, List<CartItem> items) {
+              if (items.isEmpty) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.delete_sweep_outlined),
+                tooltip: 'إفراغ السلة',
+                onPressed: () => _confirmClear(context),
+              );
+            },
+          ),
+        ],
+      ),
       bottomNavigationBar: const AppBottomNavBar(current: AppTab.cart),
       body: BlocBuilder<CartCubit, List<CartItem>>(
         builder: (BuildContext context, List<CartItem> items) {
@@ -53,6 +68,29 @@ class CartPage extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Asks for confirmation before emptying every line from the cart.
+Future<void> _confirmClear(BuildContext context) async {
+  final CartCubit cart = context.read<CartCubit>();
+  final bool? confirmed = await showDialog<bool>(
+    context: context,
+    builder: (BuildContext ctx) => AlertDialog(
+      title: const Text('إفراغ السلة'),
+      content: const Text('هل تريد إزالة جميع المنتجات من سلة المشتريات؟'),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(false),
+          child: const Text('إلغاء'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(ctx).pop(true),
+          child: const Text('إفراغ'),
+        ),
+      ],
+    ),
+  );
+  if (confirmed ?? false) await cart.clear();
 }
 
 class _EmptyCart extends StatelessWidget {

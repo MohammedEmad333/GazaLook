@@ -6,8 +6,11 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/otp_page.dart';
 import '../../features/cart/presentation/pages/cart_page.dart';
 import '../../features/cart/presentation/pages/checkout_page.dart';
+import '../../features/home/presentation/pages/categories_page.dart';
 import '../../features/home/presentation/pages/home_feed_page.dart';
 import '../../features/orders/presentation/pages/orders_page.dart';
+import '../../features/products/domain/entities/product_category.dart';
+import '../../features/products/presentation/pages/category_products_page.dart';
 import '../../features/products/presentation/pages/product_detail_page.dart';
 import '../../features/products/presentation/pages/search_page.dart';
 import '../../features/products/presentation/pages/wishlist_page.dart';
@@ -84,10 +87,19 @@ abstract final class AppRouter {
         GoRoute(
           path: AppRoutes.categories,
           name: 'categories',
-          builder: (context, state) => const PlaceholderScreen(
-            title: 'التصنيفات',
-            icon: Icons.category_outlined,
-          ),
+          builder: (context, state) => const CategoriesPage(),
+        ),
+        GoRoute(
+          path: AppRoutes.categoryProducts,
+          name: 'categoryProducts',
+          builder: (context, state) {
+            final String? name = state.pathParameters['filter'];
+            final CatalogFilter filter = CatalogFilter.values.firstWhere(
+              (CatalogFilter f) => f.name == name,
+              orElse: () => CatalogFilter.all,
+            );
+            return CategoryProductsPage(filter: filter);
+          },
         ),
         GoRoute(
           path: AppRoutes.wishlist,
